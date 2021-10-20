@@ -1,0 +1,7 @@
+{
+    "actions": [],
+    "eslint.workingDirectories": [
+        { "directory": "apps/webapp", "changeProcessCWD": true },
+        { "directory": "services/rest-api", "changeProcessCWD": true }
+      ]
+}
