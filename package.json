@@ -2,23 +2,13 @@
 	"name": "@wms-2/root",
 	"version": "1.0.0",
 	"private": true,
-	"scripts": {
-		"webapp:dev": "cd apps/webapp && npm run dev",
-		"rest-api:dev": "cd services/rest-api && npm run start:dev",
-		"dev": "concurrently \"npm run webapp:dev\" \"npm run rest-api:dev\" "
-	},
 	"workspaces": [
 		"packages/*",
 		"apps/*",
 		"services/*"
 	],
 	"dependencies": {
-		"@babel/core": "^7.15.8",
-		"@babel/plugin-transform-runtime": "^7.15.8",
-		"@babel/preset-env": "^7.15.8",
-		"@babel/preset-react": "^7.14.5"
 	},
 	"devDependencies": {
-		"concurrently": "^6.3.0"
 	}
 }
