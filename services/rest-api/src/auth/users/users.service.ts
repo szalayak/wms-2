@@ -22,10 +22,10 @@ export class UsersService {
     return this.findById(result.identifiers[0].id);
   }
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return (await this.usersRepository.find()).map((u) => new User(u));
   }
   async findById(id: string): Promise<User> {
-    return this.usersRepository.findOne(id);
+    return new User(await this.usersRepository.findOne(id));
   }
   async findByEmail(email: string): Promise<User> {
     const results = await this.usersRepository.find({
@@ -34,7 +34,7 @@ export class UsersService {
       },
     });
     if (results) {
-      return results[0];
+      return new User(results[0]);
     }
   }
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {

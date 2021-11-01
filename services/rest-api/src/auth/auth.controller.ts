@@ -5,44 +5,55 @@ import {
   Request,
   Response,
   Get,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
-  ApiBasicAuth,
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCookieAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AccessToken } from './auth.interface';
+import { AccessToken, UserInfo } from './auth.interface';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { User } from './users/user.interface';
+import { UsersService } from './users/users.service';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({ summary: 'Authenticate' })
   @ApiResponse({ type: AccessToken })
-  @ApiBasicAuth()
+  @ApiBody({ type: UserInfo })
+  @ApiConsumes('application/x-www-form-urlencoded')
   async authenticate(@Request() req, @Response() res) {
     const result = await this.authService.login(req.user);
     res.cookie('jwt_token', result.access_token, {
       httpOnly: true,
       sameSite: 'strict',
     });
-    return result;
+    res.json(result);
   }
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiCookieAuth('jwt_token')
   @Get('profile')
   @ApiOperation({ summary: 'Get current profile' })
   @ApiResponse({ type: User })
+  @UseInterceptors(ClassSerializerInterceptor)
   async profile(@Request() req) {
-    return req.user;
+    return this.usersService.findById(req.user.userId);
   }
 }

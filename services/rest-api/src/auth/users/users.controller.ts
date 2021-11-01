@@ -1,11 +1,13 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
   Param,
   Post,
   Put,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -27,6 +29,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Create User' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ type: User })
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.create(createUserDto);
   }
@@ -35,6 +38,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user' })
   @ApiParam({ name: 'id', description: 'ID', type: String })
   @ApiResponse({ type: User, description: 'Updated User' })
+  @UseInterceptors(ClassSerializerInterceptor)
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -52,6 +56,7 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'Find all users' })
   @ApiResponse({ type: User, description: 'All users', isArray: true })
+  @UseInterceptors(ClassSerializerInterceptor)
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
@@ -60,6 +65,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user by Id' })
   @ApiParam({ name: 'id', description: 'ID', type: String })
   @ApiResponse({ type: User, description: 'Created User' })
+  @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findById(id);
   }
