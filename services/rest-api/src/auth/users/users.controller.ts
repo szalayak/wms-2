@@ -4,31 +4,40 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Post,
   Put,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
+  ApiCookieAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../jwt-auth.guard';
 import { User } from './user.interface';
 import { CreateUserDto, UpdateUserDto } from './users.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 @ApiTags('users')
+@ApiBearerAuth()
+@ApiCookieAuth('jwt_token')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create User' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ type: User })
+  @ApiResponse({ type: User, description: 'User created', status: 201 })
+  @ApiResponse({ status: 400, description: 'Incorrect input' })
   @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.create(createUserDto);
@@ -64,7 +73,8 @@ export class UsersController {
   @Get(':id')
   @ApiOperation({ summary: 'Get user by Id' })
   @ApiParam({ name: 'id', description: 'ID', type: String })
-  @ApiResponse({ type: User, description: 'Created User' })
+  @ApiResponse({ type: User, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findById(id);

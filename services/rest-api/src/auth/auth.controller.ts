@@ -8,6 +8,7 @@ import {
   ClassSerializerInterceptor,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -30,6 +31,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -43,9 +45,31 @@ export class AuthController {
     res.cookie('jwt_token', result.access_token, {
       httpOnly: true,
       sameSite: 'strict',
+      path: '/api',
+      expires: new Date(
+        Date.now() + this.configService.get<number>('JWT_EXPIRY'),
+      ),
     });
     res.json(result);
   }
+
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiCookieAuth('jwt_token')
+  @ApiResponse({ status: 200, description: 'Successfully logged out' })
+  @ApiResponse({ status: 401, description: 'Not logged in' })
+  async logout(@Response() res) {
+    res.cookie('jwt_token', null, {
+      expires: new Date(Date.now()),
+      path: '/api',
+      secure: 'false',
+      httpOnly: true,
+    });
+    res.sendStatus(200);
+  }
+
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCookieAuth('jwt_token')
