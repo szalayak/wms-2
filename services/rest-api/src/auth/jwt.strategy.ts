@@ -3,13 +3,17 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { UsersService } from './users/users.service';
 
 const cookieExtractor: JwtFromRequestFunction = (req: Request) =>
   req && req.cookies ? req.cookies['jwt_token'] : null;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private usersService: UsersService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         cookieExtractor,
@@ -20,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
-    return { userId: payload.sub, username: payload.email };
+  async validate({ sub }: { sub: string; email: string }) {
+    return this.usersService.findById(sub);
   }
 }

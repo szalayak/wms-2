@@ -36,7 +36,7 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create User' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ type: User, description: 'User created', status: 201 })
+  @ApiResponse({ type: User, description: 'User created' })
   @ApiResponse({ status: 400, description: 'Incorrect input' })
   @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
@@ -46,7 +46,8 @@ export class UsersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update user' })
   @ApiParam({ name: 'id', description: 'ID', type: String })
-  @ApiResponse({ type: User, description: 'Updated User' })
+  @ApiResponse({ type: User, description: 'User updated' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   @UseInterceptors(ClassSerializerInterceptor)
   async update(
     @Param('id') id: string,
@@ -57,6 +58,7 @@ export class UsersController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user' })
+  @ApiResponse({ description: 'User deleted' })
   @ApiParam({ name: 'id', description: 'ID', type: String })
   async delete(@Param('id') id: string) {
     return this.usersService.remove(id);

@@ -1,11 +1,10 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { UserEntity } from 'src/db/entities';
 
 export class User {
-  constructor(userEntity: UserEntity) {
-    if (userEntity) {
-      Object.assign(this, userEntity);
+  constructor(user: Partial<User>) {
+    if (user) {
+      Object.assign(this, user);
     }
   }
 
