@@ -18,16 +18,21 @@ export class UsersService {
     private usersRepository: Repository<UserEntity>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    if (await this.findByEmail(createUserDto.email)) {
-      throw new BadRequestException('Email address already exists');
-    }
+  async create(
+    createUserDto: CreateUserDto,
+    createdById: string,
+  ): Promise<User> {
     const user: QueryDeepPartialEntity<UserEntity> = {
       ...createUserDto,
       password: await hash(createUserDto.password, await genSalt()),
+      createdById,
     };
-    const result = await this.usersRepository.insert(user);
-    return this.findById(result.identifiers[0].id);
+    try {
+      const result = await this.usersRepository.insert(user);
+      return this.findById(result.identifiers[0].id);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -43,19 +48,41 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User> {
-    const results = await this.usersRepository.find({
+    return this.usersRepository.findOne({
       where: {
         email,
       },
     });
-    if (results.length > 0) {
-      return new User(results[0]);
-    }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async findByUsername(username: string): Promise<User> {
+    return this.usersRepository.findOne({
+      where: {
+        username,
+      },
+    });
+  }
+
+  async findByUsernameOrEmail(usernameOrEmail: string): Promise<User> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .where(
+        'user.username = :usernameOrEmail or user.email = :usernameOrEmail',
+        { usernameOrEmail },
+      )
+      .getOne();
+  }
+
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    lastChangedById: string,
+  ): Promise<User> {
     await this.findById(id); // check if it exists
-    await this.usersRepository.update(id, updateUserDto);
+    await this.usersRepository.update(id, {
+      ...updateUserDto,
+      lastChangedById,
+    });
     return this.findById(id);
   }
 

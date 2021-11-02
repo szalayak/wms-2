@@ -103,6 +103,6 @@ export class AuthController {
   })
   @UseInterceptors(ClassSerializerInterceptor)
   async profile(@Request() req: ExpressRequestWithUser) {
-    return req.user;
+    return this.usersService.findById(req.user.id);
   }
 }

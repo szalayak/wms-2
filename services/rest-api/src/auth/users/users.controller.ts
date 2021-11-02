@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -39,8 +40,11 @@ export class UsersController {
   @ApiResponse({ type: User, description: 'User created' })
   @ApiResponse({ status: 400, description: 'Incorrect input' })
   @UseInterceptors(ClassSerializerInterceptor)
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  async create(
+    @Req() req,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
+    return this.usersService.create(createUserDto, req.user.id);
   }
 
   @Put(':id')
@@ -50,10 +54,11 @@ export class UsersController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   @UseInterceptors(ClassSerializerInterceptor)
   async update(
+    @Req() req,
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, req.user.id);
   }
 
   @Delete(':id')
